@@ -1,0 +1,18 @@
+[project]
+name = "minilab"
+version = "0.1.0"
+description = "Extract markdown headers with red/green TDD"
+authors = [
+    { name = "lmist", email = "lmisto@proximie.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
