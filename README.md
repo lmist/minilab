@@ -9,9 +9,11 @@
 
 ---
 
-## Prompt
+## Prompts
 
 > "Build a Python function to extract headers from a markdown string. Use red/green TDD."
+
+> "write the prompt you received from me into a Readme file and publish a public github repo, public, with a naming scheme that matches my style. make sure the readme is fancy and the github repo is well decorated. include the tools we used such as the model and agent with links to them. come up only after you've run gh repo view --web. make sure we have no secrets to leak."
 
 ## What it does
 
