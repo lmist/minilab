@@ -70,10 +70,36 @@ uv run pytest
 - Test runner: [pytest](https://docs.pytest.org/)
 - Python project manager: [uv](https://docs.astral.sh/uv/)
 
+## Claude Code park mode hook
+
+A `PostToolUse` hook that puts Claude in park mode after writing `.ts` or `.py` files — Claude stops and waits for user instructions before continuing.
+
+```bash
+# .ts file → parks Claude (exit 2)
+$ echo '{"tool_name":"Write","tool_input":{"file_path":"src/main.ts"}}' \
+    | npx tsx .claude/hooks/park-mode.ts
+PARK MODE: Written file "src/main.ts" matches .ts, .py. Stop and wait for user instructions before taking any further action.
+# exit code: 2
+
+# .py file → parks Claude (exit 2)
+$ echo '{"tool_name":"Write","tool_input":{"file_path":"src/app.py"}}' \
+    | npx tsx .claude/hooks/park-mode.ts
+PARK MODE: Written file "src/app.py" matches .ts, .py. Stop and wait for user instructions before taking any further action.
+# exit code: 2
+
+# .md file → passes through (exit 0)
+$ echo '{"tool_name":"Write","tool_input":{"file_path":"README.md"}}' \
+    | npx tsx .claude/hooks/park-mode.ts
+# exit code: 0
+```
+
 ## Project layout
 
 ```text
 .
+├── .claude/
+│   ├── hooks/park-mode.ts
+│   └── settings.json
 ├── src/minilab/markdown.py
 ├── tests/test_markdown_headers.py
 └── pyproject.toml
