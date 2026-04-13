@@ -72,25 +72,43 @@ uv run pytest
 
 ## Claude Code park mode hook
 
-A `PostToolUse` hook that puts Claude in park mode after writing `.ts` or `.py` files — Claude stops and waits for user instructions before continuing.
+An interactive `PreToolUse` + `PostToolUse` hook on `Edit|Write` for `*.ts` and `*.py` files. Before each edit, you choose:
+
+| Choice | Effect |
+|--------|--------|
+| **(y)es** | Allow the edit, continue normally |
+| **(n)o** | Deny the edit |
+| **(w)ait** | Allow the edit, then park — Claude stops and waits for instructions |
+| **(a)uto** | Allow this and all future edits for the session without prompting |
 
 ```bash
-# .ts file → parks Claude (exit 2)
-$ echo '{"tool_name":"Write","tool_input":{"file_path":"src/main.ts"}}' \
+# PreToolUse .ts, no TTY → defaults to allow
+$ echo '{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"/x/main.ts"},"session_id":"t1"}' \
     | npx tsx .claude/hooks/park-mode.ts
-PARK MODE: Written file "src/main.ts" matches .ts, .py. Stop and wait for user instructions before taking any further action.
-# exit code: 2
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}
+# exit: 0
 
-# .py file → parks Claude (exit 2)
-$ echo '{"tool_name":"Write","tool_input":{"file_path":"src/app.py"}}' \
+# PreToolUse .md → not matched, passes through
+$ echo '{"hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"/x/README.md"},"session_id":"t2"}' \
     | npx tsx .claude/hooks/park-mode.ts
-PARK MODE: Written file "src/app.py" matches .ts, .py. Stop and wait for user instructions before taking any further action.
-# exit code: 2
+# exit: 0
 
-# .md file → passes through (exit 0)
-$ echo '{"tool_name":"Write","tool_input":{"file_path":"README.md"}}' \
+# PostToolUse .py + wait flag → parks Claude
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Edit","tool_input":{"file_path":"/x/app.py"},"session_id":"t3"}' \
     | npx tsx .claude/hooks/park-mode.ts
-# exit code: 0
+PARK MODE: Edit on "app.py" done. Waiting for your instructions.
+# exit: 2
+
+# PostToolUse .ts, no wait flag → passes through
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"/x/main.ts"},"session_id":"t4"}' \
+    | npx tsx .claude/hooks/park-mode.ts
+# exit: 0
+
+# PreToolUse .py + auto flag → allows silently
+$ echo '{"hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"/x/app.py"},"session_id":"t5"}' \
+    | npx tsx .claude/hooks/park-mode.ts
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}
+# exit: 0
 ```
 
 ## Project layout
